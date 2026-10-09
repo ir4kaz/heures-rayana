@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les heures de Rayana</title>
+<meta name="description" content="Calculer l'écart entre deux heures et additionner des durées.">
+<meta name="theme-color" content="#f6efff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Heures">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Fredoka:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #f6efff;
+  --card: #ffffff;
+  --ink: #2a1640;
+  --soft: #5b4a75;
+  --violet: #7c3aed;
+  --pink: #ec4899;
+  --blush: #fbcfe8;
+  --lilac: #f3e8ff;
+  --f-title: "Bagel Fat One", "Fredoka", system-ui, sans-serif;
+  --f-body: "Fredoka", "Nunito", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px;
+  padding: 16px; padding-block: 22px calc(24px + env(safe-area-inset-bottom, 0px));
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+.app {
+  max-width: 440px; margin: 0 auto; min-height: calc(100vh - 46px);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.pill {
+  align-self: flex-start; background: var(--pink); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 999px; padding: 3px 12px;
+  font-size: 13px; font-weight: 600; letter-spacing: .04em;
+}
+h1 {
+  margin: 0; font-family: var(--f-title); font-weight: 400; font-size: 36px;
+  line-height: 1.05; color: var(--violet); text-wrap: balance;
+}
+.head { display: flex; flex-direction: column; gap: 6px; }
+
+.tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tabs button {
+  font: 600 17px var(--f-body); padding: 12px 4px; border-radius: 14px;
+  border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--ink); color: #ffffff; }
+
+button:focus-visible, input:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+
+.display {
+  position: relative; overflow: hidden; background: var(--violet); color: #ffffff;
+  border: 2px solid var(--ink); border-radius: 24px; box-shadow: 6px 6px 0 var(--pink);
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;
+}
+.display::before {
+  content: ""; position: absolute; right: -34px; top: -34px; width: 110px; height: 110px;
+  border-radius: 999px; background: var(--pink); border: 2px solid var(--ink);
+}
+.display::after {
+  content: ""; position: absolute; right: 52px; top: 18px; width: 18px; height: 18px;
+  border-radius: 999px; background: var(--blush);
+}
+.display > * { position: relative; }
+.label { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--lilac); }
+.big {
+  display: flex; align-items: baseline; gap: 4px; font-size: 64px; font-weight: 600;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.big .u { font-size: 26px; font-weight: 500; color: var(--lilac); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: var(--ink); color: #ffffff; border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 500; }
+.chip:empty { display: none; }
+.note { font-size: 14px; color: var(--blush); }
+.note:empty { display: none; }
+
+.card {
+  background: var(--card); border: 2px solid var(--ink); border-radius: 20px;
+  padding: 18px; display: flex; flex-direction: column; gap: 16px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.lab { font-size: 14px; font-weight: 600; color: var(--soft); }
+.times { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; align-items: end; }
+.arrow { padding-bottom: 14px; font-size: 22px; color: var(--pink); font-weight: 600; }
+
+input {
+  font: 500 22px var(--f-body); color: var(--ink); background: var(--bg);
+  border: 2px solid var(--ink); border-radius: 14px; padding: 10px; height: 56px;
+  width: 100%; min-width: 0; text-align: center; font-variant-numeric: tabular-nums;
+}
+input[type="time"] {
+  -webkit-appearance: none; appearance: none; display: block; text-align: left; padding: 10px 10px;
+}
+input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+input::placeholder { color: #8a7aa3; }
+.dur { display: flex; align-items: center; gap: 8px; }
+.u2 { font-size: 16px; color: var(--soft); }
+
+.lines { display: flex; flex-direction: column; gap: 12px; }
+.line { display: grid; grid-template-columns: 50px minmax(0, 1fr) 40px; gap: 8px; align-items: center; }
+.line .dur { gap: 6px; }
+.line input { padding: 10px 4px; height: 54px; }
+.sign {
+  height: 54px; border-radius: 14px; border: 2px solid var(--ink);
+  background: var(--violet); color: #ffffff; font: 600 28px var(--f-body); cursor: pointer;
+}
+.sign.neg { background: var(--pink); color: var(--ink); }
+.del {
+  width: 40px; height: 40px; border-radius: 12px; border: 0; background: transparent;
+  color: var(--soft); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+}
+.actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.btn {
+  font: 600 17px var(--f-body); padding: 13px 8px; border-radius: 14px; cursor: pointer;
+  border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);
+}
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn.plus { background: var(--violet); color: #ffffff; }
+.btn.minus { background: var(--pink); color: var(--ink); }
+.reset {
+  font: 500 15px var(--f-body); padding: 10px; border-radius: 14px;
+  border: 2px dashed #8a7aa3; background: transparent; color: var(--soft); cursor: pointer;
+}
+
+.cat { margin-top: auto; display: flex; align-items: flex-end; justify-content: center; gap: 4px; padding-top: 8px; }
+.cat svg { max-width: 100%; height: auto; }
+.bubble {
+  align-self: flex-start; margin-top: 18px; background: var(--card); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 18px 18px 18px 4px; padding: 8px 14px;
+  font-size: 16px; font-weight: 600; box-shadow: 3px 3px 0 var(--pink);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cat svg { animation: bob 3.2s ease-in-out infinite; transform-origin: 50% 100%; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="head">
+    <span class="pill">calcul d'heures</span>
+    <h1>Les heures de Rayana</h1>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button id="tab-ecart" role="tab" aria-selected="true" data-panel="p-ecart">Écart</button>
+    <button id="tab-calc" role="tab" aria-selected="false" data-panel="p-calc">Total</button>
+  </div>
+
+  <section id="p-ecart" role="tabpanel" style="display:contents">
+    <div class="display" aria-live="polite">
+      <span class="label">Temps entre les deux heures</span>
+      <div class="big" id="e-big"><span>3</span><span class="u">h</span><span>10</span></div>
+      <div class="chips"><span class="chip" id="e-min">190 min</span></div>
+      <span class="note" id="e-note"></span>
+    </div>
+    <div class="card">
+      <div class="times">
+        <div class="field"><label class="lab" for="e-start">Début</label><input type="time" id="e-start" value="18:50"></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="field"><label class="lab" for="e-end">Fin</label><input type="time" id="e-end" value="22:00"></div>
+      </div>
+      <div class="field">
+        <span class="lab">Pause à retirer</span>
+        <div class="dur">
+          <input type="number" id="e-ph" inputmode="numeric" min="0" placeholder="0" aria-label="Heures de pause"><span class="u2">h</span>
+          <input type="number" id="e-pm" inputmode="numeric" min="0" placeholder="0" aria-label="Minutes de pause"><span class="u2">min</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="p-calc" role="tabpanel" style="display:contents" hidden>
+    <div class="display" aria-live="polite">
+      <span class="label">Total</span>
+      <div class="big" id="c-big"><span>0</span><span class="u">h</span><span>00</span></div>
+      <div class="chips"><span class="chip" id="c-min">0 min</span></div>
+    </div>
+    <div class="card">
+      <div class="lines" id="lines"></div>
+      <div class="actions">
+        <button class="btn plus" id="add-plus">+ Ajouter</button>
+        <button class="btn minus" id="add-minus">− Retirer</button>
+      </div>
+      <button class="reset" id="reset">Tout effacer</button>
+    </div>
+  </section>
+
+  <div class="cat">
+    <svg role="img" aria-label="Un petit chat tient une horloge" width="190" height="160" viewBox="0 0 200 168" fill="none">
+      <path d="M146 142 C190 142 192 92 166 88" stroke="#2a1640" stroke-width="18" stroke-linecap="round" fill="none"/>
+      <path d="M146 142 C190 142 192 92 166 88" stroke="#fbcfe8" stroke-width="11" stroke-linecap="round" fill="none"/>
+      <ellipse cx="100" cy="124" rx="52" ry="38" fill="#fbcfe8" stroke="#2a1640" stroke-width="3"/>
+      <path d="M58 54 L64 14 L92 38 Z" fill="#fbcfe8" stroke="#2a1640" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M142 54 L136 14 L108 38 Z" fill="#fbcfe8" stroke="#2a1640" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M66 42 L68 26 L80 37 Z" fill="#ec4899"/>
+      <path d="M134 42 L132 26 L120 37 Z" fill="#ec4899"/>
+      <ellipse cx="100" cy="70" rx="48" ry="40" fill="#fbcfe8" stroke="#2a1640" stroke-width="3"/>
+      <path d="M76 68 q7 -8 14 0" stroke="#2a1640" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+      <path d="M110 68 q7 -8 14 0" stroke="#2a1640" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+      <ellipse cx="72" cy="82" rx="8" ry="5" fill="#ec4899" opacity="0.55"/>
+      <ellipse cx="128" cy="82" rx="8" ry="5" fill="#ec4899" opacity="0.55"/>
+      <path d="M96 76 L104 76 L100 81 Z" fill="#2a1640"/>
+      <path d="M94 84 q3 4 6 0 q3 4 6 0" stroke="#2a1640" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+      <path d="M52 76 L34 72 M52 82 L34 84 M148 76 L166 72 M148 82 L166 84" stroke="#2a1640" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="82" cy="158" rx="14" ry="8" fill="#fbcfe8" stroke="#2a1640" stroke-width="3"/>
+      <ellipse cx="118" cy="158" rx="14" ry="8" fill="#fbcfe8" stroke="#2a1640" stroke-width="3"/>
+      <circle cx="100" cy="122" r="20" fill="#ffffff" stroke="#2a1640" stroke-width="3"/>
+      <path d="M100 122 L100 110 M100 122 L108 126" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="100" cy="122" r="2.5" fill="#2a1640"/>
+      <ellipse cx="78" cy="128" rx="10" ry="8" fill="#fbcfe8" stroke="#2a1640" stroke-width="3"/>
+      <ellipse cx="122" cy="128" rx="10" ry="8" fill="#fbcfe8" stroke="#2a1640" stroke-width="3"/>
+    </svg>
+    <span class="bubble">Miaou !</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem("rh_" + k)); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem("rh_" + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  const num = (v) => { const n = parseInt(v, 10); return isFinite(n) && n > 0 ? n : 0; };
+  const pad = (n) => String(n).padStart(2, "0");
+
+  function setBig(el, min) {
+    if (min === null) { el.innerHTML = "<span>—</span>"; return; }
+    const neg = min < 0, a = Math.abs(min);
+    el.innerHTML = "<span>" + (neg ? "−" : "") + Math.floor(a / 60) + '</span><span class="u">h</span><span>' + pad(a % 60) + "</span>";
+  }
+
+  const tabs = document.querySelectorAll(".tabs button");
+  function showTab(btn) {
+    tabs.forEach((t) => {
+      const on = t === btn;
+      t.setAttribute("aria-selected", on);
+      $(t.dataset.panel).hidden = !on;
+    });
+    store.set("tab", btn.id);
+  }
+  tabs.forEach((t) => t.addEventListener("click", () => showTab(t)));
+
+  function parseTime(v) {
+    if (!v || !/^\d{1,2}:\d{2}/.test(v)) return null;
+    const p = v.split(":");
+    return Number(p[0]) * 60 + Number(p[1]);
+  }
+  function calcEcart() {
+    const s = parseTime($("e-start").value), e = parseTime($("e-end").value);
+    const pause = num($("e-ph").value) * 60 + num($("e-pm").value);
+    if (s === null || e === null) {
+      setBig($("e-big"), null); $("e-min").textContent = "Choisis les deux heures"; $("e-note").textContent = "";
+    } else {
+      let d = e - s; const notes = [];
+      if (d < 0) { d += 1440; notes.push("Passage de minuit compté."); }
+      if (pause) { d -= pause; notes.push("Pause de " + Math.floor(pause / 60) + "h" + pad(pause % 60) + " retirée."); }
+      setBig($("e-big"), d);
+      $("e-min").textContent = d + " min";
+      $("e-note").textContent = d < 0 ? "La pause dépasse le temps travaillé." : notes.join(" ");
+    }
+    store.set("ecart", { s: $("e-start").value, e: $("e-end").value, ph: $("e-ph").value, pm: $("e-pm").value });
+  }
+  ["e-start", "e-end", "e-ph", "e-pm"].forEach((id) => {
+    $(id).addEventListener("input", calcEcart);
+    $(id).addEventListener("change", calcEcart);
+  });
+
+  let lines = [{ sign: 1, h: 7, m: 45 }, { sign: 1, h: 3, m: 20 }, { sign: -1, h: 0, m: 30 }];
+  function calcTotal() {
+    const t = lines.reduce((acc, l) => acc + l.sign * (num(l.h) * 60 + num(l.m)), 0);
+    setBig($("c-big"), t);
+    $("c-min").textContent = t + " min";
+    store.set("lines", lines);
+  }
+  function renderLines(focusLast) {
+    const wrap = $("lines");
+    wrap.innerHTML = "";
+    lines.forEach((l, i) => {
+      const row = document.createElement("div");
+      row.className = "line";
+      row.innerHTML =
+        '<button class="sign' + (l.sign < 0 ? " neg" : "") + '" aria-label="Changer + ou −">' + (l.sign < 0 ? "−" : "+") + "</button>" +
+        '<div class="dur">' +
+          '<input type="number" inputmode="numeric" min="0" aria-label="Heures" placeholder="0" value="' + (l.h || "") + '"><span class="u2">h</span>' +
+          '<input type="number" inputmode="numeric" min="0" aria-label="Minutes" placeholder="0" value="' + (l.m || "") + '"><span class="u2">min</span>' +
+        "</div>" +
+        '<button class="del" aria-label="Supprimer la ligne"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+      const ins = row.querySelectorAll("input");
+      const signBtn = row.querySelector(".sign");
+      signBtn.addEventListener("click", () => {
+        l.sign = -l.sign;
+        signBtn.textContent = l.sign < 0 ? "−" : "+";
+        signBtn.classList.toggle("neg", l.sign < 0);
+        calcTotal();
+      });
+      ins[0].addEventListener("input", () => { l.h = num(ins[0].value); calcTotal(); });
+      ins[1].addEventListener("input", () => { l.m = num(ins[1].value); calcTotal(); });
+      row.querySelector(".del").addEventListener("click", () => { lines.splice(i, 1); renderLines(false); calcTotal(); });
+      wrap.appendChild(row);
+      if (focusLast && i === lines.length - 1) setTimeout(() => ins[0].focus(), 0);
+    });
+  }
+  function addLine(sign) { lines.push({ sign, h: 0, m: 0 }); renderLines(true); calcTotal(); }
+  $("add-plus").addEventListener("click", () => addLine(1));
+  $("add-minus").addEventListener("click", () => addLine(-1));
+  $("reset").addEventListener("click", () => { lines = [{ sign: 1, h: 0, m: 0 }]; renderLines(true); calcTotal(); });
+
+  const e = store.get("ecart");
+  if (e) { $("e-start").value = e.s || ""; $("e-end").value = e.e || ""; $("e-ph").value = e.ph || ""; $("e-pm").value = e.pm || ""; }
+  const saved = store.get("lines");
+  if (Array.isArray(saved) && saved.length) lines = saved.map((l) => ({ sign: l.sign < 0 ? -1 : 1, h: num(l.h), m: num(l.m) }));
+  const tab = store.get("tab");
+  if (tab && $(tab)) showTab($(tab));
+
+  calcEcart(); renderLines(false); calcTotal();
+
+  // Mode hors ligne
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  }
+})();
+</script>
+</body>
+</html>

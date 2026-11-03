@@ -190,7 +190,7 @@ input::placeholder { color: #8a7aa3; }
     <div class="display" aria-live="polite">
       <span class="label">Total</span>
       <div class="big" id="c-big"><span>0</span><span class="u">h</span><span>00</span></div>
-      <div class="chips"><span class="chip" id="c-min">0 min</span></div>
+      <div class="chips"><span class="chip" id="c-min">0 min</span><span class="chip" id="c-eur">0,00 €</span></div>
     </div>
     <div class="card">
       <div class="lines" id="lines"></div>
@@ -241,6 +241,7 @@ input::placeholder { color: #8a7aa3; }
   };
   const num = (v) => { const n = parseInt(v, 10); return isFinite(n) && n > 0 ? n : 0; };
   const pad = (n) => String(n).padStart(2, "0");
+  const TAUX = 10; // € par heure
 
   function setBig(el, min) {
     if (min === null) { el.innerHTML = "<span>—</span>"; return; }
@@ -289,6 +290,8 @@ input::placeholder { color: #8a7aa3; }
     const t = lines.reduce((acc, l) => acc + l.sign * (num(l.h) * 60 + num(l.m)), 0);
     setBig($("c-big"), t);
     $("c-min").textContent = t + " min";
+    const eur = t * TAUX / 60;
+    $("c-eur").textContent = (eur < 0 ? "−" : "") + Math.abs(eur).toFixed(2).replace(".", ",") + " €";
     store.set("lines", lines);
   }
   function renderLines(focusLast) {

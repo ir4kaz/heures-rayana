@@ -1,6 +1,6 @@
 // Mode hors ligne : garde une copie de l'appli dans le téléphone.
-// Pour publier une mise à jour, change le numéro de version ci-dessous.
-const CACHE = "heures-rayana-2026-11-13j";
+// L'appli prend toujours la dernière version en ligne ; la copie sert hors connexion.
+const CACHE = "heures-rayana-v10";
 const FILES = [
   "./",
   "./index.html",
@@ -40,12 +40,16 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Fichiers de l'appli : d'abord la copie locale, sinon le réseau
+  // Fichiers de l'appli : d'abord la dernière version en ligne,
+  // et la copie gardée dans le téléphone seulement s'il n'y a pas internet
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(req, { ignoreSearch: true }).then((hit) =>
-        hit || fetch(req).catch(() => caches.match("./index.html"))
-      )
+      fetch(req, { cache: "no-cache" })
+        .then((res) => {
+          if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
+          return res;
+        })
+        .catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || caches.match("./index.html")))
     );
   }
 });

@@ -806,7 +806,10 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
 
   // Mode hors ligne
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {}); });
+    // Quand une nouvelle version arrive, on recharge une fois pour l'afficher tout de suite
+    const hadCtrl = !!navigator.serviceWorker.controller; let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadCtrl && !reloaded) { reloaded = true; location.reload(); } });
   }
 })();
 </script>

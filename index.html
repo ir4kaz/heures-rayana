@@ -217,6 +217,16 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
   .cat svg { animation: bob 3.2s ease-in-out infinite; transform-origin: 50% 100%; }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 }
+.dev { text-align: center; font-size: 13px; color: var(--soft); }
+.dev summary { list-style: none; cursor: pointer; display: inline-block; padding: 6px 10px; border-radius: 999px; }
+.dev summary::-webkit-details-marker { display: none; }
+.dev summary u { text-decoration-style: dotted; text-underline-offset: 3px; }
+.dev .num { display: block; margin-top: 4px; font-size: 15px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.dev .ways { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.dev .ways a {
+  font: 600 14px var(--f-body); color: var(--ink); background: var(--card); text-decoration: none;
+  border: 2px solid var(--ink); border-radius: 999px; padding: 6px 14px;
+}
 </style>
 </head>
 <body>
@@ -346,6 +356,14 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
     </svg>
     <span class="bubble">Miaou !</span>
   </div>
+  <details class="dev">
+    <summary>Fait par ZachDass · <u>contacter le développeur</u></summary>
+    <span class="num">07 68 12 66 31</span>
+    <div class="ways">
+      <a href="https://wa.me/33768126631" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="sms:+33768126631">SMS</a>
+    </div>
+  </details>
 </div>
 
 <script>
@@ -636,23 +654,152 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
     const h = entryOf(ev.target); if (!h || parseTime(ev.target.value) === null) return;
     h.e = ev.target.value; saveHours(); render();
   });
+  /* ---------- Récap en image ---------- */
+  const TH = {"bg": "#fff0f6", "card": "#ffffff", "ink": "#6b2c50", "soft": "#9b4f78", "disp": "#fbb6d4", "shadow": "#e879b0", "circle": "#e879b0", "tint": "#ffe4ef", "label": "#8a3d68", "big": "#6b2c50", "unit": "#8a3d68", "title": "#d9468f", "chipBg": "#6b2c50", "chipFg": "#ffffff", "pillBg": "#ffe4ef", "pillFg": "#6b2c50", "pillBorder": "#6b2c50", "fT": "\"Bagel Fat One\"", "wT": "400", "fB": "Fredoka", "pill": "K-Ramen ♡"};
+  if (document.fonts) [TH.wT + " 60px " + TH.fT, "400 30px " + TH.fB, "500 30px " + TH.fB, "600 30px " + TH.fB]
+    .forEach((f) => { try { document.fonts.load(f).catch(() => {}); } catch (e) {} });
+  function rrect(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function wrapParts(c, parts, maxW) {
+    const out = []; let cur = "";
+    parts.forEach((p) => {
+      const t = cur ? cur + "  ·  " + p : p;
+      if (cur && c.measureText(t).width > maxW) { out.push(cur); cur = p; } else cur = t;
+    });
+    if (cur) out.push(cur);
+    return out;
+  }
+  function recapCanvas(r) {
+    const W = 1080, P = 64, cv = document.createElement("canvas"), c = cv.getContext("2d");
+    const fB = (w, s) => w + " " + s + "px " + TH.fB + ", system-ui, -apple-system, sans-serif", tint = r.tint || TH.tint;
+    const inner = W - 2 * P - 56, DAYW = 150, DURW = 110, PW = inner - DAYW - DURW - 44;
+    c.font = fB(400, 28);
+    const weeks = r.weeks.map((w) => ({ ...w, rows: w.rows.map((x) => ({ ...x, lines: wrapParts(c, x.parts, PW) })) }));
+    const rowH = (x) => 14 + x.lines.length * 38;
+    const weekH = (w) => 72 + w.rows.reduce((t, x) => t + rowH(x), 0);
+    const listH = weeks.length ? weeks.reduce((t, w) => t + weekH(w) + 24, -24) : 60;
+    const H = P + 52 + 24 + 84 + 56 + 36 + 300 + 50 + (28 + listH + 28) + 40 + 40 + P;
+    cv.width = W; cv.height = H;
+    c.fillStyle = TH.bg; c.fillRect(0, 0, W, H);
+    let y = P;
+    // petite étiquette
+    c.font = fB(600, 28); const pw = c.measureText(TH.pill).width + 44;
+    rrect(c, P, y, pw, 52, 26); c.fillStyle = TH.pillBg; c.fill();
+    if (TH.pillBorder) { c.lineWidth = 4; c.strokeStyle = TH.pillBorder; c.stroke(); }
+    c.fillStyle = TH.pillFg; c.textBaseline = "middle"; c.fillText(TH.pill, P + 22, y + 27);
+    y += 52 + 24;
+    // titre + mois
+    c.textBaseline = "alphabetic";
+    c.font = TH.wT + " 76px " + TH.fT + ", " + TH.fB + ", system-ui, sans-serif"; c.fillStyle = TH.title; c.fillText("Heures de " + r.name, P, y + 68);
+    y += 84;
+    c.font = fB(500, 38); c.fillStyle = TH.soft; c.fillText(r.mois, P, y + 40);
+    y += 56 + 36;
+    // gros cadre
+    const bx = P, bw = W - 2 * P, bh = 300;
+    rrect(c, bx + 14, y + 14, bw, bh, 44); c.fillStyle = TH.shadow; c.fill();
+    rrect(c, bx, y, bw, bh, 44); c.fillStyle = TH.disp; c.fill();
+    c.save(); rrect(c, bx, y, bw, bh, 44); c.clip();
+    c.beginPath(); c.arc(bx + bw + 10, y - 10, 120, 0, Math.PI * 2); c.fillStyle = TH.circle; c.fill();
+    c.lineWidth = 5; c.strokeStyle = TH.ink; c.stroke(); c.restore();
+    rrect(c, bx, y, bw, bh, 44); c.lineWidth = 5; c.strokeStyle = TH.ink; c.stroke();
+    c.font = fB(600, 28); c.fillStyle = TH.label; c.fillText("TOTAL DU MOIS", bx + 44, y + 66);
+    const hm = r.total.replace("−", "").split("h");
+    let x = bx + 40; const base = y + 196;
+    c.font = fB(600, 124); c.fillStyle = TH.big; c.fillText(hm[0], x, base); x += c.measureText(hm[0]).width + 6;
+    c.font = fB(500, 52); c.fillStyle = TH.unit; c.fillText("h", x, base); x += c.measureText("h").width + 6;
+    c.font = fB(600, 124); c.fillStyle = TH.big; c.fillText(hm[1], x, base);
+    if (r.eur) {
+      c.font = fB(600, 58); const tw = c.measureText(r.eur).width, ew = tw + 48, eh = 92;
+      const ex = bx + bw - 40 - ew, ey = base - 72;
+      rrect(c, ex + 6, ey + 6, ew, eh, 22); c.fillStyle = TH.ink; c.fill();
+      rrect(c, ex, ey, ew, eh, 22); c.fillStyle = TH.card; c.fill(); c.lineWidth = 4; c.strokeStyle = TH.ink; c.stroke();
+      c.fillStyle = TH.ink; c.textBaseline = "middle"; c.fillText(r.eur, ex + 24, ey + eh / 2 + 3); c.textBaseline = "alphabetic";
+    }
+    const chip = r.nd + (r.nd > 1 ? " jours" : " jour");
+    c.font = fB(500, 28); const cw = c.measureText(chip).width + 40;
+    rrect(c, bx + 40, y + 222, cw, 50, 25); c.fillStyle = TH.chipBg; c.fill();
+    c.fillStyle = TH.chipFg; c.textBaseline = "middle"; c.fillText(chip, bx + 60, y + 248); c.textBaseline = "alphabetic";
+    y += bh + 50;
+    // liste des jours
+    const ch = 28 + listH + 28;
+    rrect(c, P, y, W - 2 * P, ch, 36); c.fillStyle = TH.card; c.fill(); c.lineWidth = 5; c.strokeStyle = TH.ink; c.stroke();
+    let ry = y + 28; const rx = P + 28;
+    if (!weeks.length) { c.font = fB(500, 32); c.fillStyle = TH.soft; c.fillText("Aucune heure notée ce mois-ci.", rx + 8, ry + 42); }
+    weeks.forEach((w) => {
+      rrect(c, rx, ry, inner, 66, 20); c.fillStyle = tint; c.fill();
+      c.font = fB(600, 32); c.fillStyle = TH.title; c.fillText(w.label, rx + 22, ry + 44);
+      c.textAlign = "right"; c.fillStyle = TH.ink; c.fillText(w.dur + (w.eur ? "  ·  " + w.eur : ""), rx + inner - 22, ry + 44); c.textAlign = "left";
+      ry += 72;
+      w.rows.forEach((row, i) => {
+        if (i) { c.fillStyle = tint; c.fillRect(rx + 22, ry, inner - 44, 2); }
+        c.font = fB(600, 28); c.fillStyle = TH.ink; c.fillText(row.day, rx + 22, ry + 38);
+        c.font = fB(400, 28); c.fillStyle = TH.soft;
+        row.lines.forEach((l, j) => c.fillText(l, rx + 22 + DAYW, ry + 38 + j * 38));
+        c.textAlign = "right"; c.font = fB(600, 28); c.fillStyle = TH.ink; c.fillText(row.dur, rx + inner - 22, ry + 38); c.textAlign = "left";
+        ry += rowH(row);
+      });
+      ry += 24;
+    });
+    y += ch + 40;
+    c.font = fB(400, 26); c.fillStyle = TH.soft; c.textAlign = "center";
+    c.fillText("K-Ramen" + (r.taux ? " · " + r.taux : "") + " · fait le " + new Date().toLocaleDateString("fr-FR"), W / 2, y + 26);
+    c.textAlign = "left";
+    return cv;
+  }
+  function sendRecap(r) {
+    let file = null;
+    try {
+      const url = recapCanvas(r).toDataURL("image/png"), bin = atob(url.split(",")[1]), arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      file = new File([arr], r.file + ".png", { type: "image/png" });
+    } catch (e) { file = null; }
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: "Heures de " + r.name }).catch(() => {});
+      return;
+    }
+    if (file) {
+      const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      toast("Image enregistrée !");
+      return;
+    }
+    if (navigator.share) navigator.share({ text: r.text }).catch(() => {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(r.text).then(() => toast("Récap copié !"), () => toast("Impossible de copier"));
+  }
+  const part = (h) => isAdj(h) ? (h.sg < 0 ? "−" : "+") + fmt(num(h.a)) : h.s + "–" + h.e + (num(h.p) ? " (pause " + num(h.p) + " min)" : "");
   $("q-send").addEventListener("click", () => {
+    const name = NAME;
+    const eur = TAUX ? money(sum(monthList())) : "";
     const key = (h) => h.date + (h.s || "99:99");
     const list = monthList().sort((a, b) => key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0);
     const mois = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(month);
-    const df = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+    const df = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric" });
     const days = {}; list.forEach((h) => { (days[h.date] = days[h.date] || []).push(h); });
-    const lines = ["Heures de " + NAME + " · " + mois + " (" + RESTO + ")", ""];
-    Object.keys(days).forEach((k) => {
-      const d = df.format(fromKey(k));
-      lines.push(d.charAt(0).toUpperCase() + d.slice(1) + " : " + days[k].map((h) => isAdj(h) ? (h.sg < 0 ? "−" : "+") + fmt(num(h.a)) : h.s + "–" + h.e + (num(h.p) ? " (pause " + num(h.p) + " min)" : "")).join(", ") + " → " + fmt(sum(days[k])));
+    const rows = Object.keys(days).map((k) => { const d = df.format(fromKey(k)); return { k, day: d.charAt(0).toUpperCase() + d.slice(1), parts: days[k].map(part), dur: fmt(sum(days[k])) }; });
+    const total = sum(list), nd = rows.length, eurOf = (m) => TAUX ? money(m) : "";
+    const ws = (k) => { const d = fromKey(k); return dkey(new Date(d.getFullYear(), d.getMonth(), d.getDate() - (d.getDay() + 6) % 7)); };
+    const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    const mshort = new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(month);
+    const weeks = [];
+    rows.forEach((r) => {
+      const w = ws(r.k); let g = weeks[weeks.length - 1];
+      if (!g || g.w !== w) {
+        const mon = fromKey(w), sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+        const a = w.slice(0, 7) === ym() ? mon.getDate() : 1, b = dkey(sun).slice(0, 7) === ym() ? sun.getDate() : lastDay;
+        const m = sum(list.filter((h) => ws(h.date) === w));
+        g = { w, label: "Semaine du " + a + (a === b ? "" : " au " + b) + " " + mshort, dur: fmt(m), eur: eurOf(m), rows: [] };
+        weeks.push(g);
+      }
+      g.rows.push(r);
     });
-    if (!list.length) lines.push("Aucune heure notée ce mois-ci.");
-    const total = sum(list), nd = Object.keys(days).length;
-    lines.push("", "Total : " + fmt(total) + " · " + nd + (nd > 1 ? " jours" : " jour") + (TAUX ? " · " + money(total) : ""));
-    const text = lines.join("\n");
-    if (navigator.share) navigator.share({ text }).catch(() => {});
-    else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast("Récap copié !"), () => toast("Impossible de copier"));
+    const lines = ["Heures de " + name + " · " + mois + " (K-Ramen)"];
+    weeks.forEach((g) => { lines.push("", g.label + " : " + g.dur + (g.eur ? " · " + g.eur : "")); g.rows.forEach((r) => lines.push(r.day + " : " + r.parts.join(", ") + " → " + r.dur)); });
+    lines.push("");
+    if (!rows.length) lines.push("Aucune heure notée ce mois-ci.", "");
+    lines.push("Total du mois : " + fmt(total) + " · " + nd + (nd > 1 ? " jours" : " jour") + (eur ? " · " + eur : ""));
+    sendRecap({ name, mois: mois.charAt(0).toUpperCase() + mois.slice(1), total: fmt(total), eur, nd, weeks, taux: TAUX ? TAUX + " €/h" : "", text: lines.join("\n"), file: "recap-" + (name || "equipe").toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-") + "-" + ym() });
   });
   function render() { renderMonth(); renderDay(); }
   render();

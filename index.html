@@ -227,6 +227,8 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
   font: 600 14px var(--f-body); color: var(--ink); background: var(--card); text-decoration: none;
   border: 2px solid var(--ink); border-radius: 999px; padding: 6px 14px;
 }
+.sync { margin-top: -8px; text-align: center; font-size: 13px; color: var(--soft); }
+.sync[data-state="off"] { color: var(--ink); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -249,6 +251,7 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
       <div class="chips"><span class="chip" id="q-days"></span></div>
     </div>
     <button class="btn plus" id="q-send">Envoyer le récap à Uzi</button>
+    <span class="sync" id="sync" aria-live="polite"></span>
 
     <div class="card">
       <div class="nav">
@@ -494,7 +497,7 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
   const today = dkey(new Date());
   let selDate = today;
   let month = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  const saveHours = () => store.set("hours", hours);
+  const saveHours = () => { store.set("hours", hours); syncLocal(); };
   const ym = () => month.getFullYear() + "-" + pad(month.getMonth() + 1);
   const monthList = () => hours.filter((h) => h.date.slice(0, 7) === ym());
   const sum = (list) => list.reduce((t, h) => t + mins(h), 0);
@@ -803,6 +806,108 @@ input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
   });
   function render() { renderMonth(); renderDay(); }
   render();
+
+  /* ---------- Synchro en ligne (Firebase) ---------- */
+  // Les heures sont envoyées dans une base en ligne pour qu'Uzi les reçoive.
+  // Sans internet, tout reste dans le téléphone et part dès que le réseau revient.
+  const SYNC_DB = window.__SYNC_DB || "https://k-ramen-heures-default-rtdb.europe-west1.firebasedatabase.app/equipe-jgodv61v1h7nelxenb44";
+  const SYNC_MODE = "emp";            // "emp" = une employée, "team" = Uzi (toute l'équipe)
+  const SYNC_BASE = "hours/rayana";              // chemin dans la base
+  const keyOf = (h) => SYNC_MODE === "team" ? h.staff + "/" + h.id : h.id;
+  const toRemote = (h) => { const o = Object.assign({}, h); delete o.staff; return o; };
+  const J = (v) => JSON.stringify(v === undefined ? null : v);
+  let pend = store.get("sync_pend"); if (!pend || typeof pend !== "object") pend = {};
+  let snap = {};
+  const takeSnap = () => { snap = {}; hours.forEach((h) => { snap[keyOf(h)] = J(toRemote(h)); }); };
+  takeSnap();
+  if (!store.get("sync_init")) {            // 1re fois : on envoie tout ce qui est déjà noté
+    hours.forEach((h) => { pend[keyOf(h)] = toRemote(h); });
+    store.set("sync_pend", pend); store.set("sync_init", 1);
+  }
+  function syncLocal() {                    // appelé à chaque enregistrement
+    const now = {};
+    hours.forEach((h) => { now[keyOf(h)] = J(toRemote(h)); });
+    Object.keys(now).forEach((k) => { if (snap[k] !== now[k]) pend[k] = JSON.parse(now[k]); });
+    Object.keys(snap).forEach((k) => { if (!(k in now)) pend[k] = null; });
+    snap = now;
+    store.set("sync_pend", pend);
+    flush();
+  }
+  let flushT, flushing = false, syncOk = null;
+  function setSync(ok) {
+    syncOk = ok;
+    const el = $("sync"); if (!el) return;
+    const n = Object.keys(pend).length;
+    el.textContent = ok === false || (n && !navigator.onLine)
+      ? "Hors ligne · " + (n ? "les heures partiront dès que le réseau revient" : "pas de connexion")
+      : n ? "Envoi en cours…" : (SYNC_MODE === "team" ? "À jour ✓" : "Envoyé à Uzi ✓");
+    el.dataset.state = ok === false || (n && !navigator.onLine) ? "off" : n ? "wait" : "ok";
+  }
+  function flush(delay) { clearTimeout(flushT); flushT = setTimeout(doFlush, delay == null ? 400 : delay); setSync(syncOk); }
+  async function doFlush() {
+    if (flushing) return;
+    const keys = Object.keys(pend);
+    if (!keys.length) { setSync(true); return; }
+    flushing = true;
+    const body = {}; keys.forEach((k) => { body[k] = pend[k]; });
+    try {
+      const r = await fetch(SYNC_DB + "/" + SYNC_BASE + ".json", { method: "PATCH", body: JSON.stringify(body) });
+      if (!r.ok) throw new Error(r.status);
+      keys.forEach((k) => { if (J(pend[k]) === J(body[k])) delete pend[k]; });
+      store.set("sync_pend", pend);
+      flushing = false; setSync(true);
+      if (Object.keys(pend).length) flush();
+    } catch (e) {
+      flushing = false; setSync(false);
+      flush(30000);                         // on réessaie dans 30 s
+    }
+  }
+  // Réception des changements (de l'autre appli)
+  let remote = null;
+  function setAt(path, val) {
+    const parts = path.split("/").filter(Boolean);
+    if (!parts.length) { remote = val; return; }
+    if (!remote || typeof remote !== "object") remote = {};
+    let o = remote;
+    for (let i = 0; i < parts.length - 1; i++) { if (!o[parts[i]] || typeof o[parts[i]] !== "object") o[parts[i]] = {}; o = o[parts[i]]; }
+    if (val === null) delete o[parts[parts.length - 1]]; else o[parts[parts.length - 1]] = val;
+  }
+  function applyRemote() {
+    const list = [];
+    const add = (staff, id, v) => { if (!v || typeof v !== "object") return; const h = Object.assign({}, v, { id }); if (SYNC_MODE === "team") h.staff = staff; if (h.date) list.push(h); };
+    if (remote && typeof remote === "object") {
+      if (SYNC_MODE === "team") Object.keys(remote).forEach((s) => { const m = remote[s]; if (m && typeof m === "object") Object.keys(m).forEach((id) => add(s, id, m[id])); });
+      else Object.keys(remote).forEach((id) => add(null, id, remote[id]));
+    }
+    const byKey = {}; list.forEach((h) => { byKey[keyOf(h)] = h; });
+    Object.keys(pend).forEach((k) => {      // ce qui n'est pas encore parti garde la priorité
+      if (pend[k] === null) delete byKey[k];
+      else { const h = Object.assign({}, pend[k]); if (SYNC_MODE === "team") h.staff = k.split("/")[0]; byKey[k] = h; }
+    });
+    const next = Object.values(byKey);
+    const sig = (arr) => arr.map((h) => keyOf(h) + J(toRemote(h))).sort().join("|");
+    if (sig(next) === sig(hours)) return;
+    hours = next; store.set("hours", hours); takeSnap();
+    const ae = document.activeElement;
+    if (ae && ae.closest && ae.closest("#d-adj")) { renderMonth(); return; }  // on ne coupe pas la saisie en cours
+    render();
+  }
+  let es = null;
+  function listen() {
+    if (!window.EventSource) return;
+    try { if (es) es.close(); } catch (e) {}
+    es = new EventSource(SYNC_DB + "/" + SYNC_BASE + ".json");
+    const on = (ev) => { try { const d = JSON.parse(ev.data); if (!d) return;
+      if (ev.type === "put") setAt(d.path, d.data);
+      else Object.keys(d.data || {}).forEach((k) => setAt(d.path.replace(/\/$/, "") + "/" + k, d.data[k]));
+      applyRemote(); if (!Object.keys(pend).length) setSync(true); } catch (e) {} };
+    es.addEventListener("put", on); es.addEventListener("patch", on);
+    es.onerror = () => { if (!navigator.onLine) setSync(false); };
+  }
+  window.addEventListener("online", () => { flush(0); listen(); });
+  window.addEventListener("offline", () => setSync(false));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { flush(0); if (!es || es.readyState === 2) listen(); } });
+  listen(); flush(0);
 
   // Mode hors ligne
   if ("serviceWorker" in navigator) {

@@ -28,6 +28,10 @@
   --lilac: #8a3d68;
   --f-title: "Bagel Fat One", "Fredoka", system-ui, sans-serif;
   --f-body: "Fredoka", "Nunito", system-ui, -apple-system, sans-serif;
+  --tint: var(--blush);
+  --today: var(--pink);
+  --preset: var(--violet);
+  --line: #f0c4d8;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -55,9 +59,9 @@ h1 {
 }
 .head { display: flex; flex-direction: column; gap: 6px; }
 
-.tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .tabs button {
-  font: 600 17px var(--f-body); padding: 12px 4px; border-radius: 14px;
+  font: 600 16px var(--f-body); padding: 12px 2px; border-radius: 14px;
   border: 2px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer;
 }
 .tabs button[aria-selected="true"] { background: var(--ink); color: #ffffff; }
@@ -84,6 +88,15 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--pink); outl
   line-height: 1; font-variant-numeric: tabular-nums;
 }
 .big .u { font-size: 26px; font-weight: 500; color: var(--lilac); }
+.hrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.hrow .big { font-size: clamp(34px, 10.5vw, 54px); }
+.hrow .big .u { font-size: .42em; }
+.eur {
+  flex: none; background: var(--card); color: var(--ink); border: 2px solid var(--ink); border-radius: 16px;
+  padding: 5px 10px; font-size: clamp(19px, 6vw, 26px); font-weight: 600; line-height: 1.1; white-space: nowrap;
+  font-variant-numeric: tabular-nums; box-shadow: 3px 3px 0 var(--ink);
+}
+.eur:empty { display: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { background: var(--ink); color: #ffffff; border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 500; }
 .chip:empty { display: none; }
@@ -113,6 +126,7 @@ input::placeholder { color: #c48aa8; }
 .u2 { font-size: 16px; color: var(--soft); }
 
 .lines { display: flex; flex-direction: column; gap: 12px; }
+.lines:empty { display: none; }
 .line { display: grid; grid-template-columns: 50px minmax(0, 1fr) 40px; gap: 8px; align-items: center; }
 .line .dur { gap: 6px; }
 .line input { padding: 10px 4px; height: 54px; }
@@ -138,6 +152,60 @@ input::placeholder { color: #c48aa8; }
   border: 2px dashed #e0a3c2; background: transparent; color: var(--soft); cursor: pointer;
 }
 
+/* Mes heures */
+.ct { margin: 0; font-family: var(--f-title); font-weight: 400; font-size: 21px; color: var(--ink); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ct small { font-family: var(--f-body); font-size: 15px; font-weight: 600; color: var(--soft); }
+.nav { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; }
+.nav button {
+  height: 44px; border-radius: 12px; border: 2px solid var(--ink); background: var(--card);
+  color: var(--ink); font: 600 20px var(--f-body); cursor: pointer;
+}
+.nav span { text-align: center; font-family: var(--f-title); font-size: 20px; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) 30px; gap: 4px; }
+.cal .wd { text-align: center; font-size: 12px; font-weight: 600; color: var(--soft); padding-bottom: 2px; }
+.cal button {
+  height: 54px; border-radius: 12px; border: 2px solid transparent; background: transparent; color: var(--ink);
+  font-family: var(--f-body); padding: 5px 0 4px; display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between; cursor: pointer; min-width: 0;
+}
+.cal .n { font-size: 15px; font-weight: 500; }
+.cal .h { font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; min-height: 14px; }
+.cal button.has { background: var(--tint); }
+.cal button.today { border-color: var(--today); }
+.cal button[aria-pressed="true"] { background: var(--ink); color: #ffffff; border-color: var(--ink); }
+.list { display: flex; flex-direction: column; }
+.list:empty { display: none; }
+.entry {
+  display: grid; grid-template-columns: auto 96px minmax(0, 1fr) 40px; align-items: center; gap: 6px 8px;
+  padding: 10px 10px 10px 12px; border-radius: 14px; background: var(--tint); margin-bottom: 8px;
+}
+.entry:last-child { margin-bottom: 0; }
+.entry .when { font-weight: 500; font-variant-numeric: tabular-nums; }
+.entry .when span { color: var(--soft); font-size: 13px; display: block; }
+.entry input.end { height: 48px; font-size: 18px; padding: 4px 6px; background: var(--card); text-align: center; box-shadow: 0 0 0 3px var(--today); }
+.entry .d { text-align: right; font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums; }
+.presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.presets button {
+  font: 600 16px var(--f-body); padding: 10px 4px; border-radius: 14px; min-height: 58px;
+  border: 2px solid var(--ink); background: var(--preset); color: var(--ink); cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink); display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.presets button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.presets small { font-weight: 400; font-size: 12px; color: var(--ink); opacity: .75; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--soft); font-size: 13px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1.5px; background: var(--line); }
+input.sm { font-size: 18px; height: 50px; padding: 6px 8px; }
+.reset.armed { background: var(--pink); color: var(--ink); border: 2px solid var(--ink); font-weight: 600; }
+.cal button.wk { justify-content: center; color: var(--ink); padding: 0; background: var(--tint); }
+.cal button.wk:disabled { opacity: .3; cursor: default; background: transparent; }
+.cal button.wk.armed { background: var(--pink); color: var(--ink); border-color: var(--ink); }
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--ink); color: #ffffff; padding: 10px 18px; border-radius: 999px; font-weight: 500;
+  box-shadow: 3px 3px 0 var(--today); opacity: 0; pointer-events: none; transition: opacity .2s; white-space: nowrap;
+}
+.toast.on { opacity: 1; }
+.app:has(#p-mes:not([hidden])) .cat { display: none; }
 .cat { margin-top: auto; display: flex; align-items: flex-end; justify-content: center; gap: 4px; padding-top: 8px; }
 .cat svg { max-width: 100%; height: auto; }
 .bubble {
@@ -159,11 +227,60 @@ input::placeholder { color: #c48aa8; }
   </div>
 
   <div class="tabs" role="tablist">
-    <button id="tab-ecart" role="tab" aria-selected="true" data-panel="p-ecart">Écart</button>
+    <button id="tab-mes" role="tab" aria-selected="true" data-panel="p-mes">Mes heures</button>
+    <button id="tab-ecart" role="tab" aria-selected="false" data-panel="p-ecart">Écart</button>
     <button id="tab-calc" role="tab" aria-selected="false" data-panel="p-calc">Total</button>
   </div>
 
-  <section id="p-ecart" role="tabpanel" style="display:contents">
+  <section id="p-mes" role="tabpanel" style="display:contents">
+    <div class="display" aria-live="polite">
+      <span class="label" id="q-title">Mes heures</span>
+      <div class="hrow"><div class="big" id="q-big"><span>0</span><span class="u">h</span><span>00</span></div><span class="eur" id="q-eur"></span></div>
+      <div class="chips"><span class="chip" id="q-days"></span></div>
+    </div>
+    <button class="btn plus" id="q-send">Envoyer le récap à Uzi</button>
+
+    <div class="card">
+      <div class="nav">
+        <button id="m-prev" aria-label="Mois précédent">‹</button>
+        <span id="m-label"></span>
+        <button id="m-next" aria-label="Mois suivant">›</button>
+      </div>
+      <div class="cal" id="cal"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="ct"><span id="d-title"></span><small id="d-total"></small></h2>
+      <div class="list" id="d-list"></div>
+      <div class="lines" id="d-adj"></div>
+      <button class="reset" id="w-day">Effacer ce jour</button>
+      <div class="presets">
+        <button data-p="midi">Midi<small>11:50–14:00</small></button>
+        <button data-p="soir">Soir<small>18:50–22:00</small></button>
+        <button data-p="both">Les deux<small>midi + soir</small></button>
+      </div>
+      <div class="or">ou des horaires précis</div>
+      <div class="times">
+        <div class="field"><label class="lab" for="q-s">Début</label><input type="time" id="q-s" class="sm" value="11:50"></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="field"><label class="lab" for="q-e">Fin</label><input type="time" id="q-e" class="sm" value="14:00"></div>
+      </div>
+      <div class="field">
+        <label class="lab" for="q-p">Pause à retirer</label>
+        <div class="dur"><input type="number" id="q-p" class="sm" inputmode="numeric" min="0" placeholder="0"><span class="u2">min</span></div>
+      </div>
+      <button class="btn plus" id="q-add">Ajouter</button>
+      <div class="or">ou du temps en plus / en moins</div>
+      <div class="actions">
+        <button class="btn plus" id="adj-plus">+ Ajouter</button>
+        <button class="btn minus" id="adj-minus">− Retirer</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <section id="p-ecart" role="tabpanel" style="display:contents" hidden>
     <div class="display" aria-live="polite">
       <span class="label">Temps entre les deux heures</span>
       <div class="big" id="e-big"><span>3</span><span class="u">h</span><span>10</span></div>
@@ -285,7 +402,7 @@ input::placeholder { color: #c48aa8; }
     $(id).addEventListener("change", calcEcart);
   });
 
-  let lines = [{ sign: 1, h: 7, m: 45 }, { sign: 1, h: 3, m: 20 }, { sign: -1, h: 0, m: 30 }];
+  let lines = [{ sign: 1, h: 0, m: 0 }];
   function calcTotal() {
     const t = lines.reduce((acc, l) => acc + l.sign * (num(l.h) * 60 + num(l.m)), 0);
     setBig($("c-big"), t);
@@ -330,11 +447,215 @@ input::placeholder { color: #c48aa8; }
   const e = store.get("ecart");
   if (e) { $("e-start").value = e.s || ""; $("e-end").value = e.e || ""; $("e-ph").value = e.ph || ""; $("e-pm").value = e.pm || ""; }
   const saved = store.get("lines");
-  if (Array.isArray(saved) && saved.length) lines = saved.map((l) => ({ sign: l.sign < 0 ? -1 : 1, h: num(l.h), m: num(l.m) }));
+  // les anciennes heures d'exemple (7h45, 3h20, −30 min) ne sont pas gardées
+  const EXEMPLE = '[{"sign":1,"h":7,"m":45},{"sign":1,"h":3,"m":20},{"sign":-1,"h":0,"m":30}]';
+  if (Array.isArray(saved) && saved.length && JSON.stringify(saved) !== EXEMPLE) lines = saved.map((l) => ({ sign: l.sign < 0 ? -1 : 1, h: num(l.h), m: num(l.m) }));
   const tab = store.get("tab");
   if (tab && $(tab)) showTab($(tab));
 
   calcEcart(); renderLines(false); calcTotal();
+
+  /* ---------- Mes heures ---------- */
+  const NAME = "Rayana", BOSS = "Uzi", RESTO = "K-Ramen";
+  const dkey = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  const fromKey = (k) => { const p = k.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+  const fmt = (min) => (min < 0 ? "−" : "") + Math.floor(Math.abs(min) / 60) + "h" + pad(Math.abs(min) % 60);
+  const money = (min) => (min < 0 ? "−" : "") + (Math.abs(min) * TAUX / 60).toFixed(2).replace(".", ",") + " €";
+  const isAdj = (h) => h.sg != null; // ligne de temps en plus / en moins
+  const mins = (h) => isAdj(h) ? h.sg * num(h.a) : dur(h.s, h.e, h.p);
+  const TRASH = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const PRESETS = { midi: [["11:50", "14:00"]], soir: [["18:50", "22:00"]], both: [["11:50", "14:00"], ["18:50", "22:00"]] };
+  function dur(s, e, p) {
+    const a = parseTime(s), b = parseTime(e);
+    if (a === null || b === null) return 0;
+    let d = b - a; if (d < 0) d += 1440;
+    return Math.max(0, d - num(p));
+  }
+  let hours = store.get("hours"); if (!Array.isArray(hours)) hours = [];
+  const today = dkey(new Date());
+  let selDate = today;
+  let month = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const saveHours = () => store.set("hours", hours);
+  const ym = () => month.getFullYear() + "-" + pad(month.getMonth() + 1);
+  const monthList = () => hours.filter((h) => h.date.slice(0, 7) === ym());
+  const sum = (list) => list.reduce((t, h) => t + mins(h), 0);
+  let toastT;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 1600); }
+
+  function renderMonth() {
+    const label = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(month);
+    $("m-label").textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    const list = monthList(), total = sum(list);
+    const nd = new Set(list.map((h) => h.date)).size;
+    $("q-title").textContent = "Mes heures · " + label;
+    setBig($("q-big"), total);
+    $("q-days").textContent = nd + (nd > 1 ? " jours" : " jour");
+    $("q-eur").textContent = TAUX ? money(total) : "";
+    const perDay = {}; list.forEach((h) => { perDay[h.date] = (perDay[h.date] || 0) + mins(h); });
+    const off = (month.getDay() + 6) % 7;
+    const nDays = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    let html = ["L", "M", "M", "J", "V", "S", "D", ""].map((d) => '<span class="wd" aria-hidden="true">' + d + "</span>").join("");
+    for (let i = 0; i < off; i++) html += "<span></span>";
+    let row = [];
+    for (let d = 1; d <= nDays; d++) {
+      const k = ym() + "-" + pad(d), m = perDay[k] || 0;
+      row.push(k);
+      html += '<button data-k="' + k + '" class="' + (m ? "has " : "") + (k === today ? "today" : "") + '" aria-pressed="' + (k === selDate) + '" aria-label="' + d + (m ? ", " + fmt(m) : "") + '">' +
+        '<span class="n">' + d + '</span><span class="h">' + (m ? fmt(m).replace("h00", "h") : "") + "</span></button>";
+      const pos = (off + d) % 7;
+      if (pos === 0 || d === nDays) {
+        if (pos) for (let i = pos; i < 7; i++) html += "<span></span>";
+        html += '<button class="wk" data-w="' + row.join(",") + '"' + (row.some((x) => perDay[x]) ? "" : " disabled") +
+          ' aria-label="Effacer les heures de cette semaine">' + TRASH + "</button>";
+        row = [];
+      }
+    }
+    $("cal").innerHTML = html;
+  }
+  $("cal").addEventListener("click", (ev) => {
+    const b = ev.target.closest("button"); if (!b) return;
+    if (b.classList.contains("wk")) {
+      if (!arm("w:" + b.dataset.w, b, () => toast("Appuie encore pour effacer la semaine"))) return;
+      const keys = b.dataset.w.split(",");
+      hours = hours.filter((h) => !keys.includes(h.date));
+      saveHours(); render(); toast("Semaine effacée");
+      return;
+    }
+    selDate = b.dataset.k; renderMonth(); renderDay();
+  });
+  function goMonth(delta) {
+    month = new Date(month.getFullYear(), month.getMonth() + delta, 1);
+    selDate = today.slice(0, 7) === ym() ? today : ym() + "-01";
+    render();
+  }
+  $("m-prev").addEventListener("click", () => goMonth(-1));
+  $("m-next").addEventListener("click", () => goMonth(1));
+
+  function renderDay() {
+    const t = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" }).format(fromKey(selDate));
+    $("d-title").textContent = t.charAt(0).toUpperCase() + t.slice(1);
+    const all = hours.filter((h) => h.date === selDate);
+    const list = all.filter((h) => !isAdj(h)).sort((a, b) => a.s.localeCompare(b.s));
+    const tot = sum(all);
+    $("d-total").textContent = tot ? fmt(tot) : "";
+    renderAdj(all.filter(isAdj));
+    $("d-list").innerHTML = list.map((h) =>
+      '<div class="entry" data-id="' + h.id + '"><span class="when">' + h.s + " →" + (num(h.p) ? "<span>pause " + num(h.p) + " min</span>" : "") + "</span>" +
+      '<input type="time" class="sm end" value="' + h.e + '" aria-label="Heure de fin">' +
+      '<span class="d">' + fmt(dur(h.s, h.e, h.p)) + "</span>" +
+      '<button class="del" aria-label="Supprimer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+    ).join("");
+    $("w-day").hidden = !all.length;
+    disarm();
+    updateAddBtn();
+  }
+
+  /* Temps en plus / en moins pour le jour choisi */
+  function renderAdj(adj) {
+    const wrap = $("d-adj");
+    wrap.innerHTML = "";
+    adj.forEach((h) => {
+      const a = num(h.a);
+      const row = document.createElement("div");
+      row.className = "line";
+      row.innerHTML =
+        '<button class="sign' + (h.sg < 0 ? " neg" : "") + '" aria-label="Changer + ou −">' + (h.sg < 0 ? "−" : "+") + "</button>" +
+        '<div class="dur">' +
+          '<input type="number" inputmode="numeric" min="0" aria-label="Heures" placeholder="0" value="' + (Math.floor(a / 60) || "") + '"><span class="u2">h</span>' +
+          '<input type="number" inputmode="numeric" min="0" aria-label="Minutes" placeholder="0" value="' + (a % 60 || "") + '"><span class="u2">min</span>' +
+        "</div>" +
+        '<button class="del" aria-label="Supprimer la ligne"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+      const ins = row.querySelectorAll("input");
+      const signBtn = row.querySelector(".sign");
+      const upd = () => {
+        h.a = num(ins[0].value) * 60 + num(ins[1].value);
+        saveHours(); renderMonth();
+        const tot = sum(hours.filter((x) => x.date === selDate));
+        $("d-total").textContent = tot ? fmt(tot) : "";
+      };
+      signBtn.addEventListener("click", () => {
+        h.sg = -h.sg;
+        signBtn.textContent = h.sg < 0 ? "−" : "+";
+        signBtn.classList.toggle("neg", h.sg < 0);
+        upd();
+      });
+      ins[0].addEventListener("input", upd);
+      ins[1].addEventListener("input", upd);
+      row.querySelector(".del").addEventListener("click", () => { hours = hours.filter((x) => x !== h); saveHours(); render(); });
+      wrap.appendChild(row);
+    });
+  }
+  function addAdj(sg) {
+    hours.push({ id: uid(), date: selDate, sg, a: 0 });
+    saveHours(); render();
+    const ins = $("d-adj").querySelectorAll(".line:last-child input");
+    if (ins.length) ins[ins.length - 1].focus();
+  }
+  $("adj-plus").addEventListener("click", () => addAdj(1));
+  $("adj-minus").addEventListener("click", () => addAdj(-1));
+
+  /* Effacer un jour / une semaine (il faut appuyer 2 fois) */
+  let armed = null, armT;
+  function disarm() {
+    armed = null; clearTimeout(armT);
+    $("w-day").classList.remove("armed"); $("w-day").textContent = "Effacer ce jour";
+    document.querySelectorAll(".wk.armed").forEach((b) => b.classList.remove("armed"));
+  }
+  function arm(key, el, onArm) {
+    if (armed === key) return true;
+    disarm(); armed = key; el.classList.add("armed"); if (onArm) onArm();
+    armT = setTimeout(disarm, 3000);
+    return false;
+  }
+  $("w-day").addEventListener("click", () => {
+    if (!arm("day", $("w-day"), () => { $("w-day").textContent = "Sûre ? Appuie encore"; })) return;
+    hours = hours.filter((h) => h.date !== selDate);
+    saveHours(); render(); toast("Journée effacée");
+  });
+  function updateAddBtn() { $("q-add").textContent = "Ajouter " + fmt(dur($("q-s").value, $("q-e").value, $("q-p").value)); }
+  ["q-s", "q-e", "q-p"].forEach((id) => { $(id).addEventListener("input", updateAddBtn); $(id).addEventListener("change", updateAddBtn); });
+  function addShift(s, e, p) { hours.push({ id: uid(), date: selDate, s, e, p: num(p) }); }
+  document.querySelector(".presets").addEventListener("click", (ev) => {
+    const b = ev.target.closest("[data-p]"); if (!b) return;
+    PRESETS[b.dataset.p].forEach((t) => addShift(t[0], t[1], 0));
+    saveHours(); render(); toast("Ajouté ! Modifie l'heure de fin si besoin");
+  });
+  $("q-add").addEventListener("click", () => {
+    const s = $("q-s").value, e = $("q-e").value;
+    if (parseTime(s) === null || parseTime(e) === null) return;
+    addShift(s, e, $("q-p").value); saveHours(); render(); toast("Ajouté !");
+  });
+  const entryOf = (el) => { const row = el.closest(".entry"); return row && hours.find((h) => h.id === row.dataset.id); };
+  $("d-list").addEventListener("click", (ev) => {
+    const del = ev.target.closest(".del"); if (!del) return;
+    const h = entryOf(del); hours = hours.filter((x) => x !== h); saveHours(); render();
+  });
+  $("d-list").addEventListener("change", (ev) => {
+    if (!ev.target.classList.contains("end")) return;
+    const h = entryOf(ev.target); if (!h || parseTime(ev.target.value) === null) return;
+    h.e = ev.target.value; saveHours(); render();
+  });
+  $("q-send").addEventListener("click", () => {
+    const key = (h) => h.date + (h.s || "99:99");
+    const list = monthList().sort((a, b) => key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0);
+    const mois = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(month);
+    const df = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+    const days = {}; list.forEach((h) => { (days[h.date] = days[h.date] || []).push(h); });
+    const lines = ["Heures de " + NAME + " · " + mois + " (" + RESTO + ")", ""];
+    Object.keys(days).forEach((k) => {
+      const d = df.format(fromKey(k));
+      lines.push(d.charAt(0).toUpperCase() + d.slice(1) + " : " + days[k].map((h) => isAdj(h) ? (h.sg < 0 ? "−" : "+") + fmt(num(h.a)) : h.s + "–" + h.e + (num(h.p) ? " (pause " + num(h.p) + " min)" : "")).join(", ") + " → " + fmt(sum(days[k])));
+    });
+    if (!list.length) lines.push("Aucune heure notée ce mois-ci.");
+    const total = sum(list), nd = Object.keys(days).length;
+    lines.push("", "Total : " + fmt(total) + " · " + nd + (nd > 1 ? " jours" : " jour") + (TAUX ? " · " + money(total) : ""));
+    const text = lines.join("\n");
+    if (navigator.share) navigator.share({ text }).catch(() => {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast("Récap copié !"), () => toast("Impossible de copier"));
+  });
+  function render() { renderMonth(); renderDay(); }
+  render();
 
   // Mode hors ligne
   if ("serviceWorker" in navigator) {
